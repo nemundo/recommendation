@@ -1,0 +1,5 @@
+
+tablename:
+FavoriteIndex
+
+

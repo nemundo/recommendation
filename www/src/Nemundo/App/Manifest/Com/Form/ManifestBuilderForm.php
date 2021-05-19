@@ -1,0 +1,207 @@
+<?php
+
+
+namespace Nemundo\App\Manifest\Com\Form;
+
+
+use Nemundo\Admin\Com\Form\AbstractAdminEditForm;
+use Nemundo\Admin\Com\Form\AbstractAdminForm;
+use Nemundo\App\Manifest\Builder\WebManifestBuilder;
+use Nemundo\App\Manifest\Filename\WebmanifestFilename;
+use Nemundo\Core\Debug\Debug;
+use Nemundo\Core\Image\Format\AutoSizeImageFormat;
+use Nemundo\Core\Image\ImageResize;
+use Nemundo\Core\Json\Reader\JsonReader;
+use Nemundo\Html\Form\Input\AcceptFileType;
+use Nemundo\Package\Bootstrap\Form\BootstrapForm;
+use Nemundo\Package\Bootstrap\FormElement\BootstrapCheckBox;
+use Nemundo\Package\Bootstrap\FormElement\BootstrapColorPicker;
+use Nemundo\Package\Bootstrap\FormElement\BootstrapFileUpload;
+use Nemundo\Package\Bootstrap\FormElement\BootstrapLargeTextBox;
+use Nemundo\Package\Bootstrap\FormElement\BootstrapListBox;
+use Nemundo\Package\Bootstrap\FormElement\BootstrapTextBox;
+use Nemundo\Project\Path\WebPath;
+
+class ManifestBuilderForm extends BootstrapForm
+{
+
+    /**
+     * @var BootstrapCheckBox
+     */
+    private $active;
+
+    /**
+     * @var BootstrapTextBox
+     */
+    private $appName;
+
+    /**
+     * @var BootstrapTextBox
+     */
+    private $shortName;
+
+    /**
+     * @var BootstrapLargeTextBox
+     */
+    private $description;
+
+    /**
+     * @var BootstrapFileUpload
+     */
+    private $icon;
+
+    /**
+     * @var BootstrapTextBox
+     */
+    private $startUrl = '/';
+
+    /**
+     * @var BootstrapListBox
+     */
+    private $display = 'fullscreen';
+
+    /**
+     * @var BootstrapColorPicker
+     */
+    private $backgroundColor;
+
+    /**
+     * @var BootstrapColorPicker
+     */
+    private $themeColor;
+
+    public function getContent()
+    {
+
+        //manifest active
+        $this->active=new BootstrapCheckBox($this);
+        $this->active->label='Active';
+
+
+        $this->appName = new BootstrapTextBox($this);
+        $this->appName->label = 'App Name';
+        $this->appName->validation = true;
+
+        $this->shortName = new BootstrapTextBox($this);
+        $this->shortName->label = 'Short Name';
+        $this->shortName->validation = true;
+
+        $this->description = new BootstrapLargeTextBox($this);
+        $this->description->label = 'Description';
+
+        $this->icon = new BootstrapFileUpload($this);
+        $this->icon->label = 'Icon';
+        $this->icon->acceptFileType=AcceptFileType::IMAGE;
+
+        $this->startUrl = new BootstrapTextBox($this);
+        $this->startUrl->label = 'Start Url';
+        $this->startUrl->validation = true;
+        $this->startUrl->value = '/';
+
+        $this->display = new BootstrapListBox($this);
+        $this->display->label = 'Display';
+        $this->display->validation = true;
+        $this->display->addItem('standalone', 'Standalone');
+        $this->display->addItem('fullscreen', 'Fullscreen');
+        $this->display->addItem('minimal-ui', 'Minimal UI');
+
+        $this->themeColor=new BootstrapColorPicker($this);
+        $this->themeColor->label='Theme Color';
+
+        $this->backgroundColor=new BootstrapColorPicker($this);
+        $this->backgroundColor->label='Background Color';
+
+
+
+        $jsonReader=new JsonReader();
+        $jsonReader->fromFilename((new WebmanifestFilename())->getFullFilename());
+
+
+
+
+
+        return parent::getContent();
+
+    }
+
+
+    //protected function on
+
+
+
+    protected function onSubmit()
+    {
+
+
+
+
+
+
+
+
+        $builder = new WebManifestBuilder();
+        $builder->appName = $this->appName->getValue();
+        $builder->shortName = $this->shortName->getValue();
+        $builder->description = $this->description->getValue();
+        $builder->display = $this->display->getValue();
+
+
+        if ($this->icon->hasValue()) {
+
+            $filename=(new WebPath())
+                ->addPath('icon')
+                ->createPath()
+                ->addPath('icon.png')
+                ->getFullFilename();
+
+            $this->icon->getFileRequest()->saveFile($filename);
+
+
+            $resize = new ImageResize();
+            $resize->format =new AutoSizeImageFormat();
+            $resize->format->size=144;
+            //$resize->format->height=144;
+            $resize->sourceFilename=$filename;
+            $resize->destinationFilename=$filename;
+            $resize->resizeImage();
+
+
+            $builder->icon = 'icon/icon.png';
+
+        }
+
+
+
+        $builder->themeColor=$this->themeColor->getValue();
+        $builder->backgroundColor=$this->backgroundColor->getValue();
+
+        $builder->createFile();
+
+
+       // (new Debug())->write($this->themeColor->getValue());
+       // exit;
+
+
+
+        /*
+                public $name;
+
+                public $shortName;
+
+                public $description;
+
+                public $icon;
+
+                public $startUrl = '/';
+
+                public $display = 'fullscreen';
+
+                public $backgroundColor;
+
+                public $themeColor;*/
+
+
+        //parent::onSubmit(); // TODO: Change the autogenerated stub
+    }
+
+}

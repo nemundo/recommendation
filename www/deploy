@@ -1,0 +1,11 @@
+git config credential.helper store
+git pull
+composer update
+php bin/setup.php
+
+sudo chown -R www-data:www-data web/data
+sudo chown -R www-data:www-data web/tmp
+sudo chown -R www-data:www-data data_redirect
+sudo chown -R www-data:www-data log
+sudo chown -R www-data:www-data tmp
+sudo chown -R www-data:www-data backup
