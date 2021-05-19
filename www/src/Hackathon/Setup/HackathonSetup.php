@@ -23,6 +23,8 @@ class HackathonSetup extends AbstractSetup
     public function run()
     {
 
+        (new ProjectInstall())->install();
+
         $reset = new ProjectReset();
         $reset->reset();
 

@@ -18,6 +18,8 @@ services:
       - 7070:80
     volumes:
       - web_data:/var/www/html/data
+    depends_on:
+      - db
 
 volumes:
   web_data:
